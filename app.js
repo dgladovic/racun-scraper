@@ -12,15 +12,15 @@ app.use(express.urlencoded({ extended: false }));
 
 app.get('/', (req,res) => {
 
-    let url = req.url.slice(8,);
+    // let url = req.url.slice(8,);
 
-    // res.send(parser.fulldata);
-    axios.get(url).then( (el) =>{
-        const hey = parser.parseData(el);
-        res.send(hey);
-        // console.log(hey);
-    })
-    console.log(req.query,'tabla');
+    // // res.send(parser.fulldata);
+    // axios.get(url).then( (el) =>{
+    //     const hey = parser.parseData(el);
+    //     res.send(hey);
+    //     // console.log(hey);
+    // })
+    // console.log(req.query,'tabla');
 
 });
 

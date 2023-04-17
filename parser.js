@@ -17,14 +17,16 @@ const clicker = async (url) => {
     const receiptRawData = htmlReceipt.split('\n========================================\n');
     const receiptItems = receiptRawData[1].split('\n');
 
-
+    const receiptRawAmount = receiptItems.slice(receiptItems.length-2,receiptItems.length-1)[0].split(':');
+    const parsedAmount = receiptRawAmount[1].replace('.',' ').replace(',','.').trim().split();
+    let receiptAmount = parseFloat(parsedAmount[0].replace(/\s+/g, "!").replace('!',''));
 
     const parsingSellerInfo = receiptRawData[0].split('\n');
     const sellerData = {
         name: parsingSellerInfo[2],
         taxName: parsingSellerInfo[3],
-        receiptNumber: parsingSellerInfo[1],
-        address: parsingSellerInfo[4],
+        receiptNumber: parseInt(parsingSellerInfo[1]),
+        address: parsingSellerInfo[4].trim(),
         location: parsingSellerInfo[5],
     }
     
@@ -39,20 +41,20 @@ const clicker = async (url) => {
         var item = {}
 
         if(i % 2 === 0){
-            item.name = e;
+            item.name = e.trim();
             let tab = parsingData[i+1].trim();
             let cont = parsingData[i+1].replace(/\s+/g, "!");
             let con2 = cont.split('!');
-            item.price = con2[1];
-            item.amount = con2[2];
-            item.total = con2[3];
+            item.price = parseFloat(con2[1].replace('.',' ').replace(',','.'));
+            item.amount = parseFloat(con2[2].replace('.',' ').replace(',','.'));
+            item.total = parseFloat(con2[3].replace('.',' ').replace(',','.'));
         parsedData.push(item);
         }
 
     });
+    fulldata = {...sellerData,parsedData, receiptAmount: receiptAmount};
     // console.log(parsedData,'testere');
-    return fulldata = {sellerData,parsedData};
-    console.log(fulldata,'testere');
+    // console.log(fulldata,'testere');
     // module.exports = {clicker,fulldata}
     })
 }
@@ -74,15 +76,17 @@ const parseData = (res) => {
     
         const receiptRawData = htmlReceipt.split('\n========================================\n');
         const receiptItems = receiptRawData[1].split('\n');
-    
-    
+
+        const receiptRawAmount = receiptItems.slice(receiptItems.length-2,receiptItems.length-1)[0].split(':');
+        const parsedAmount = receiptRawAmount[1].replace('.',' ').replace(',','.').trim().split();
+        let receiptAmount = parseFloat(parsedAmount[0].replace(/\s+/g, "!").replace('!',''));
     
         const parsingSellerInfo = receiptRawData[0].split('\n');
         const sellerData = {
             name: parsingSellerInfo[2],
             taxName: parsingSellerInfo[3],
-            receiptNumber: parsingSellerInfo[1],
-            address: parsingSellerInfo[4],
+            receiptNumber: parseInt(parsingSellerInfo[1]),
+            address: parsingSellerInfo[4].trim(),
             location: parsingSellerInfo[5],
         }
         
@@ -97,19 +101,19 @@ const parseData = (res) => {
             var item = {}
     
             if(i % 2 === 0){
-                item.name = e;
+                item.name = e.trim();
                 let tab = parsingData[i+1].trim();
                 let cont = parsingData[i+1].replace(/\s+/g, "!");
                 let con2 = cont.split('!');
-                item.price = con2[1];
-                item.amount = con2[2];
-                item.total = con2[3];
+                item.price = parseFloat(con2[1].replace('.',' ').replace(',','.'));
+                item.amount = parseFloat(con2[2].replace('.',' ').replace(',','.'));
+                item.total = parseFloat(con2[3].replace('.',' ').replace(',','.'));
             items.push(item);
             }
     
         });
         // console.log(parsedData,'testere');
-        fulldata = {...sellerData,items};
+        fulldata = {...sellerData,items, receiptAmount: receiptAmount};
         // console.log(fulldata,'testere');
         return fulldata;
         // module.exports = {clicker,fulldata}
