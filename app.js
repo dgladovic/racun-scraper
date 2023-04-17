@@ -3,12 +3,16 @@ const fs = require('fs');
 const app = express();
 const port = 4800;
 const axios = require('axios');
-
+const cors = require('cors');
 
 const parser = require('./parser');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(cors({
+    origin: '*'
+}));
 
 app.get('/', (req,res) => {
 
@@ -28,11 +32,9 @@ app.get('/scan/:id', (req,res) => {
 
     let url = req.url.slice(8,);
 
-    // res.send(parser.fulldata);
     axios.get(url).then( (el) =>{
         const hey = parser.parseData(el);
         res.send(hey);
-        // console.log(hey);
     })
 
 
