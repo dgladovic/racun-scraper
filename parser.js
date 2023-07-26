@@ -16,6 +16,7 @@ const clicker = async (url) => {
 
     const receiptRawData = htmlReceipt.split('\n========================================\n');
     const receiptItems = receiptRawData[1].split('\n');
+    const receiptTax = parseFloat(receiptRawData[2].split('\n========================================\n')[1].split(':')[1].trim().replace(',','.'));
 
     const receiptRawAmount = receiptItems.slice(receiptItems.length-2,receiptItems.length-1)[0].split(':');
     const parsedAmount = receiptRawAmount[1].replace('.',' ').replace(',','.').trim().split();
@@ -52,7 +53,7 @@ const clicker = async (url) => {
         }
 
     });
-    fulldata = {...sellerData,parsedData, receiptAmount: receiptAmount};
+    fulldata = {...sellerData,parsedData, receiptAmount: receiptAmount, receiptTax};
     // console.log(parsedData,'testere');
     // console.log(fulldata,'testere');
     // module.exports = {clicker,fulldata}
@@ -76,6 +77,7 @@ const parseData = (res) => {
     
         const receiptRawData = htmlReceipt.split('\n========================================\n');
         const receiptItems = receiptRawData[1].split('\n');
+        const receiptTax = parseFloat(receiptRawData[2].split('\n========================================\n')[1].split(':')[1].trim().replace(',','.'));
 
         const receiptRawAmount = receiptItems.slice(receiptItems.length-2,receiptItems.length-1)[0].split(':');
         const parsedAmount = receiptRawAmount[1].replace('.',' ').replace(',','.').trim().split();
@@ -113,7 +115,7 @@ const parseData = (res) => {
     
         });
         // console.log(parsedData,'testere');
-        fulldata = {...sellerData,items, receiptAmount: receiptAmount};
+        fulldata = {...sellerData,items, receiptAmount: receiptAmount, receiptTax};
         // console.log(fulldata,'testere');
         return fulldata;
         // module.exports = {clicker,fulldata}
