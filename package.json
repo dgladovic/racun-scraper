@@ -13,6 +13,8 @@
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "mongodb": "^5.7.0",
+    "mongoose": "^7.4.1",
     "scrape-html-web": "^2.3.7"
   }
 }
