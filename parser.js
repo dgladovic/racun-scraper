@@ -47,9 +47,9 @@ const clicker = async (url) => {
             let tab = parsingData[i+1].trim();
             let cont = parsingData[i+1].replace(/\s+/g, "!");
             let con2 = cont.split('!');
-            item.price = parseFloat(con2[1].replace('.',' ').replace(',','.'));
-            item.amount = parseFloat(con2[2].replace('.',' ').replace(',','.'));
-            item.total = parseFloat(con2[3].replace('.',' ').replace(',','.'));
+            item.price = parseFloat(con2[1].replace('.','').replace(',','.'));
+            item.amount = parseFloat(con2[2].replace('.','').replace(',','.'));
+            item.total = parseFloat(con2[3].replace('.','').replace(',','.'));
         parsedData.push(item);
         }
 
@@ -109,9 +109,10 @@ const parseData = (res) => {
                 let tab = parsingData[i+1].trim();
                 let cont = parsingData[i+1].replace(/\s+/g, "!");
                 let con2 = cont.split('!');
-                item.price = parseFloat(con2[1].replace('.',' ').replace(',','.'));
-                item.amount = parseFloat(con2[2].replace('.',' ').replace(',','.'));
-                item.total = parseFloat(con2[3].replace('.',' ').replace(',','.'));
+                item.price = parseFloat(con2[1].replace('.','').replace(',','.'));
+                item.amount = parseFloat(con2[2].replace('.','').replace(',','.'));
+                item.total = parseFloat(con2[3].replace('.','').replace(',','.'));
+                console.log(item,'TEST2');
             items.push(item);
             }
     
