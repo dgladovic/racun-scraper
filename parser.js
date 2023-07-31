@@ -112,7 +112,6 @@ const parseData = (res) => {
                 item.price = parseFloat(con2[1].replace('.','').replace(',','.'));
                 item.amount = parseFloat(con2[2].replace('.','').replace(',','.'));
                 item.total = parseFloat(con2[3].replace('.','').replace(',','.'));
-                console.log(item,'TEST2');
             items.push(item);
             }
     
