@@ -4,6 +4,7 @@ const app = express();
 const port = 4800;
 const axios = require('axios');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const parser = require('./parser');
 
@@ -13,6 +14,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors({
     origin: '*'
 }));
+
+app.use(bodyParser.json());
 
 app.get('/', (req,res) => {
 
@@ -39,6 +42,14 @@ app.get('/scan/:id', (req,res) => {
 
 
 });
+
+app.post('/scan/save', (req, res) => {
+    const payload = req.body;
+    // Here you can save the payload to a database or perform any other desired action
+    console.log('Received payload:', payload);
+    res.status(200).json({ message: 'Payload saved successfully' });
+  });
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
