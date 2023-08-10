@@ -1,6 +1,11 @@
 const express = require('express');
 const app = express();
 const port = 4800;
+const fs = require('fs');
+const axios = require('axios');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const parser = require('./parser');
 
 const { Pool } = require('pg')
 
@@ -18,6 +23,25 @@ const client = new Pool({
 client.connect(function(err) {
   if (err) throw err;
   console.log("Connected psql");
+});
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use(cors({
+    origin: '*'
+}));
+
+app.use(bodyParser.json());
+
+app.get('/scan/:id', (req,res) => {
+  
+      let url = req.url.slice(8,);
+  
+      axios.get(url).then( (el) =>{
+          const hey = parser.parseData(el);
+          res.send(hey);
+      })
 });
 
 
