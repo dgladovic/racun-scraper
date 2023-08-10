@@ -37,8 +37,8 @@ app.use(bodyParser.json());
 app.get('/scan/:id', (req,res) => {
   
       let url = req.url.slice(8,);
-  
       axios.get(url).then( (el) =>{
+          console.log(url,'axios-get');
           const hey = parser.parseData(el);
           res.send(hey);
       })
