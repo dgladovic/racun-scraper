@@ -85,6 +85,7 @@ router.post('/save', async (req, res) => {
 
 router.get('/:id', (req, res) => {
   try {
+    // ako se bude menjala ruta, u skladu sa tim menjati i paramtera u slice 
     const url = req.url.slice(3);
     axios.get(url).then((el) => {
       const hey = parser.parseData(el);
