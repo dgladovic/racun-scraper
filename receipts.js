@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
+const parser = require('./parser');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const { Pool } = require('pg');
 
@@ -29,6 +33,15 @@ function convertToCamelCase(obj) {
   }
   return result;
 }
+
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
+
+router.use(cors({
+  origin: '*'
+}));
+
+router.use(bodyParser.json());
 
 router.get('/totalpurchases/:userId', async (req, res) => {
   try {
