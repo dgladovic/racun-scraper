@@ -10,7 +10,7 @@ const parser = require('./parser');
 const { Pool } = require('pg')
 
 
-const client = new Pool({
+const pool = new Pool({
   user: 'scrapingbaza_user',
   host: 'dpg-cjad83ee546c738chkv0-a.frankfurt-postgres.render.com',
   database: 'scrapingbaza',
@@ -20,7 +20,7 @@ const client = new Pool({
     rejectUnauthorized: false // This option is used to bypass SSL certificate validation (use with caution)
   }
 })
-client.connect(function(err) {
+pool.connect(function(err) {
   if (err) throw err;
   console.log("Connected psql");
 });
@@ -34,6 +34,17 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
+function convertToCamelCase(obj) {
+  const result = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const camelCaseKey = key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase());
+      result[camelCaseKey] = obj[key];
+    }
+  }
+  return result;
+}
+
 app.get('/scan/:id', (req,res) => {
   
       let url = req.url.slice(8,);
@@ -43,106 +54,107 @@ app.get('/scan/:id', (req,res) => {
       })
 });
 
-// mongoose.connect('mongodb://127.0.0.1:27017/LocalDevBaza', {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-// });
+app.post('/scan/save', async (req, res) => {
+  try {
+    const {
+      receiptNumber,
+      userId,
+      name,
+      taxName,
+      address,
+      location,
+      items,
+      receiptAmount,
+      receiptTax,
+      timeDate
+    } = req.body;
 
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
+    const client = await pool.connect();
 
-// app.use(cors({
-//     origin: '*'
-// }));
+    const checkQuery = 'SELECT COUNT(*) FROM receipts WHERE receipt_number = $1';
+    const { rows } = await client.query(checkQuery, [receiptNumber]);
+    const existingCount = parseInt(rows[0].count, 10);
 
-// app.use(bodyParser.json());
+    if (existingCount > 0) {
+      client.release();
+      return res.status(400).json({ error: 'Receipt with the same receipt_number already exists' });
+    }
 
+    const insertQuery = `
+      INSERT INTO receipts (receipt_number, user_id, name, tax_name, address, location, items, receipt_amount, receipt_tax, time_date)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `;
 
-// const db = mongoose.connection;
-// db.on('error', (error) => {
-//   console.error('MongoDB connection error:', error);
-// });
-// db.once('open', () => {
-//   console.log('Connected to MongoDB successfully!');
-// });
+    await client.query(insertQuery, [
+      receiptNumber,
+      userId,
+      name,
+      taxName,
+      address,
+      location,
+      JSON.stringify(items),
+      receiptAmount,
+      receiptTax,
+      timeDate
+    ]);
 
-// app.get('/', (req,res) => {
+    client.release();
 
-//     // let url = req.url.slice(8,);
+    res.json({ message: 'Receipt saved successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error saving receipt' });
+  }
+});
 
-//     // // res.send(parser.fulldata);
-//     // axios.get(url).then( (el) =>{
-//     //     const hey = parser.parseData(el);
-//     //     res.send(hey);
-//     //     // console.log(hey);
-//     // })
-//     // console.log(req.query,'tabla');
+app.get('/receipt/totalpurchases/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
 
-// });
+    const client = await pool.connect();
+    const query = `
+      SELECT SUM(receipt_amount) AS totalAmount
+      FROM receipts
+      WHERE user_id = $1
+    `;
 
-// app.get('/scan/:id', (req,res) => {
+    const result = await client.query(query, [userId]);
+    const totalAmount = result.rows[0].totalamount || 0;
 
-//     let url = req.url.slice(8,);
+    client.release();
+    const response = convertToCamelCase({ total_amount: totalAmount });
+    res.status(200).json({ totalAmount }); // Include 200 status code
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error retrieving total amount by user' });
+  }
+});
 
-//     axios.get(url).then( (el) =>{
-//         const hey = parser.parseData(el);
-//         res.send(hey);
-//     })
+app.get('/receipts/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
 
+    const client = await pool.connect();
+    const query = `
+      SELECT * FROM public.receipts
+      WHERE user_id = $1
+    `;
 
-// });
+    const result = await client.query(query, [userId]);
+    const receipts = result.rows;
 
-// app.post('/scan/save', async (req, res) => {
-//     try{
-//         const payload = req.body;
-//         const savedReceipt = await Receipt.create(payload);
-//         console.log('Saved purchase:', savedReceipt);
-//         res.status(201).json({ message: 'Purchase saved successfully', data: savedReceipt });
-//     }
-//     catch(error){
-//         console.error('Error saving purchase:', error);
-//         res.status(500).json({ message: 'Failed to save purchase' });
-//     }
-//   });
+    client.release();
 
-//   app.get('/receipt/totalpurchases', async (req, res) => {
-//     try {
-//       const totalPurchases = await Receipt.aggregate([
-//         {
-//           $group: {
-//             _id: null,
-//             total: { $sum: '$receiptAmount' }, 
-//           },
-//         },
-//       ]);
-  
-//       if (totalPurchases.length === 0) {
-//         return res.status(404).json({ message: 'No purchases found' });
-//       }
-  
-//       res.status(200).json({ totalPurchases: totalPurchases[0].total });
-//     } catch (error) {
-//       console.error('Error calculating total purchases:', error);
-//       res.status(500).json({ message: 'Failed to calculate total purchases' });
-//     }
-//   });
-
-//   app.get('/receipts/:userId', async (req, res) => {
-//     try {
-//       const userId = req.params.userId;
-//       const allReceipts = await Receipt.find({ userId });
-
-//       res.status(200).json(allReceipts);
-  
-//       if (allReceipts.length === 0) {
-//         return res.status(404).json({ message: 'No purchases found' });
-//       }
-  
-//     } catch (error) {
-//       console.error('Error calculating total purchases:', error);
-//       res.status(500).json({ message: 'Failed to calculate total purchases' });
-//     }
-//   });
+    if (receipts.length === 0) {
+      return res.status(404).json({ message: 'No purchases found' });
+    }
+    const convertedReceipts = receipts.map(convertToCamelCase);
+    res.status(200).json(convertedReceipts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error retrieving receipts by user' });
+  }
+});
 
 
 app.listen(port, () => {
