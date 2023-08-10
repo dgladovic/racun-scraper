@@ -44,6 +44,16 @@ app.get('/scan/:id', (req,res) => {
       })
 });
 
+app.get('/test', (req,res) => {
+  try {
+
+      res.send({'data': 'test'});
+  }
+  catch (error) {
+      console.log(error);
+  }
+});
+
 
 // mongoose.connect('mongodb://127.0.0.1:27017/LocalDevBaza', {
 //   useNewUrlParser: true,
