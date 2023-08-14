@@ -28,19 +28,18 @@ router.use(bodyParser.json());
 
 // Route to register a new user
 router.post('/', async (req, res) => {
-    console.log(req,'cao');
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Check if the username is already taken
     const client = await pool.connect();
     const checkQuery = 'SELECT COUNT(*) FROM users WHERE email = $1';
-    const { rows } = await client.query(checkQuery, [username]);
+    const { rows } = await client.query(checkQuery, [email]);
     const existingCount = parseInt(rows[0].count, 10);
 
     if (existingCount > 0) {
       client.release();
-      return res.status(400).json({ message: 'Username already taken' });
+      return res.status(400).json({ message: 'Email already reigstered!' });
     }
 
     // Hash the password before storing it in the database
@@ -56,14 +55,14 @@ router.post('/', async (req, res) => {
         RETURNING user_id
       `;
       
-      const result = await client.query(insertQuery, [username, hash]);
-      const newUser = { id: result.rows[0]['user_id'], username };
+      const result = await client.query(insertQuery, [email, hash]);
+      const newUser = { id: result.rows[0]['user_id'], email };
 
       // Create and send a JWT token for the registered user
     //   const token = jwt.sign({ userId: newUser.id }, secretKey, { expiresIn: '1h' });
 
       client.release();
-      res.status(201).json({ 'success': `New user ${newUser.username} created!` });
+      res.status(201).json({ 'success': `New user ${newUser.email} created!` });
     });
   } catch (error) {
     console.error(error);
