@@ -37,8 +37,9 @@ router.post('/', async (req, res) => {
     if(!email || !password) return res.status(400).json({ message: 'Username and Password are required!' });
 
     const client = await pool.connect();
+    const emailConv = email.toLowerCase();
     const query = 'SELECT * FROM users WHERE email = $1';
-    const result = await client.query(query, [email]);
+    const result = await client.query(query, [emailConv]);
     const user = result.rows[0];
 
     console.log(user);
