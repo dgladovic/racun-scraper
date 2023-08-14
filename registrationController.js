@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 // Replace this with your actual secret key
 const secretKey = 'your-secret-key';
@@ -25,11 +26,13 @@ const pool = new Pool({
   });
 
 router.use(bodyParser.json());
-
+router.use(cors({
+    origin: '*'
+  }));
 // Route to register a new user
 router.post('/', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, first_name, last_name, date_of_birth } = req.body;
 
     // Check if the username is already taken
     const client = await pool.connect();
@@ -50,19 +53,19 @@ router.post('/', async (req, res) => {
 
       // Add the new user to the database
       const insertQuery = `
-        INSERT INTO users (email, password)
-        VALUES ($1, $2)
+        INSERT INTO users (email, password, first_name, last_name, date_of_birth)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING user_id
       `;
       
-      const result = await client.query(insertQuery, [email, hash]);
+      const result = await client.query(insertQuery, [email, hash, first_name, last_name, date_of_birth]);
       const newUser = { id: result.rows[0]['user_id'], email };
 
       // Create and send a JWT token for the registered user
     //   const token = jwt.sign({ userId: newUser.id }, secretKey, { expiresIn: '1h' });
 
       client.release();
-      res.status(201).json({ 'success': `New user ${newUser.email} created!` });
+      res.status(201).json({ 'success': `New user ${newUser.email} created!`, id: newUser.id });
     });
   } catch (error) {
     console.error(error);
