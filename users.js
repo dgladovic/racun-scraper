@@ -33,4 +33,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.delete('/all', async (req, res) => {
+    try {
+      const client = await pool.connect();
+      await client.query('DELETE FROM users');
+      client.release();
+      res.status(200).json({ message: 'All users deleted successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error deleting users' });
+    }
+  });
+
 module.exports = router;
