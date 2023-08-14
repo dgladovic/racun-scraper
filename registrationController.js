@@ -30,7 +30,7 @@ router.post('/', async (req, res) => {
 
     // Check if the username is already taken
     const client = await pool.connect();
-    const checkQuery = 'SELECT COUNT(*) FROM users WHERE username = $1';
+    const checkQuery = 'SELECT COUNT(*) FROM users WHERE email = $1';
     const { rows } = await client.query(checkQuery, [username]);
     const existingCount = parseInt(rows[0].count, 10);
 
@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
 
       // Add the new user to the database
       const insertQuery = `
-        INSERT INTO users (username, password_hash)
+        INSERT INTO users (email, password_hash)
         VALUES ($1, $2)
         RETURNING id
       `;
