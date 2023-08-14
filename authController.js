@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');
+const bodyParser = require('body-parser');
 
 // Replace this with your actual secret key
 const secretKey = 'your-secret-key';
@@ -23,15 +24,17 @@ const pool = new Pool({
     console.log("Connected psql-auth");
   });
 
+router.use(bodyParser.json());
+
 // Route to authenticate a user
 router.post('/', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if(!user || !passowrd) return res.status(400).json({ message: 'Username and Password are required!' });
+    const { email, password } = req.body;
+    if(!email || !password) return res.status(400).json({ message: 'Username and Password are required!' });
 
     const client = await pool.connect();
-    const query = 'SELECT id, password_hash FROM users WHERE email = $1';
-    const result = await client.query(query, [username]);
+    const query = 'SELECT email, password FROM users WHERE email = $1';
+    const result = await client.query(query, [email]);
     const user = result.rows[0];
 
     if (!user) {
@@ -39,7 +42,7 @@ router.post('/', async (req, res) => {
       return res.status(401).json({ message: 'Authentication failed - unauthorized.' });
     }
 
-    bcrypt.compare(password, user.password_hash, (err, result) => {
+    bcrypt.compare(password, user.password, (err, result) => {
       client.release();
       if (err || !result) {
         return res.status(401).json({ message: 'Authentication failed' });
