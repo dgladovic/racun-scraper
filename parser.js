@@ -46,11 +46,11 @@ const parseData = (res) => {
             }
     
         });
-
         const [datePart, timePart] = timeDate.split(' ');
         const [day, month, year] = datePart.split('.');
         const [hours, minutes, seconds] = timePart.split(':');
-        timeDate = new Date(`${year}-${month}-${day}T${hours}:${minutes}:${seconds}`);
+        let string = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`;
+        timeDate = new Date(string);
 
         fulldata = {...sellerData,items, receiptAmount: receiptAmount, receiptTax, timeDate};
         // console.log(fulldata,'testere');
