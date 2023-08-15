@@ -34,10 +34,11 @@ router.post('/', async (req, res) => {
   try {
     const { email, password, first_name, last_name, date_of_birth } = req.body;
 
+    const emailConv = email.toLowerCase();
     // Check if the username is already taken
     const client = await pool.connect();
     const checkQuery = 'SELECT COUNT(*) FROM users WHERE email = $1';
-    const { rows } = await client.query(checkQuery, [email]);
+    const { rows } = await client.query(checkQuery, [emailConv]);
     const existingCount = parseInt(rows[0].count, 10);
 
     if (existingCount > 0) {
@@ -58,7 +59,7 @@ router.post('/', async (req, res) => {
         RETURNING user_id
       `;
       
-      const result = await client.query(insertQuery, [email, hash, first_name, last_name, date_of_birth]);
+      const result = await client.query(insertQuery, [emailConv, hash, first_name, last_name, date_of_birth]);
       const newUser = { id: result.rows[0]['user_id'], email };
 
       // Create and send a JWT token for the registered user
