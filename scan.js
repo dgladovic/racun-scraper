@@ -18,7 +18,7 @@ const pool = new Pool({
 });
 pool.connect(function (err) {
   if (err) throw err;
-  console.log("Connected psql");
+  console.log("Connected psql-scan");
 });
 
 router.use(express.json());

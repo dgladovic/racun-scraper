@@ -42,8 +42,6 @@ router.post('/', async (req, res) => {
     const result = await client.query(query, [emailConv]);
     const user = result.rows[0];
 
-    console.log(user);
-
     if (!user) {
       client.release();
       return res.status(401).json({ message: 'Authentication failed - unauthorized.' });
