@@ -20,7 +20,7 @@ const pool = new Pool({
 
 pool.connect(function(err) {
   if (err) throw err;
-  console.log("Connected psql");
+  console.log("Connected psql-receipts");
 });
 
 function convertToCamelCase(obj) {
@@ -89,6 +89,18 @@ router.get('/:userId', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error retrieving receipts by user' });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('DELETE FROM public.receipts WHERE receipt_number = $1',[req.params.id]);
+    client.release();
+    res.status(200).json({ message: `Receipt with id ${req.params.id} deleted successfuly` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error deleting receipt' });
   }
 });
 
