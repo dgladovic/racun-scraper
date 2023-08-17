@@ -45,4 +45,16 @@ router.delete('/all', async (req, res) => {
     }
   });
 
+  router.delete('/:id', async (req, res) => {
+    try {
+      const client = await pool.connect();
+      const result = await client.query('DELETE FROM users WHERE user_id = $1',[req.params.id]);
+      client.release();
+      res.status(200).json({ message: `User with user_id ${req.params.id} deleted successfuly` });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error deleting user' });
+    }
+  });
+
 module.exports = router;
