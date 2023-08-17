@@ -92,4 +92,16 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('DELETE FROM public.receipts WHERE receipt_number = $1',[req.params.id]);
+    client.release();
+    res.status(200).json({ message: `Receipt with id ${req.params.id} deleted successfuly` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error deleting receipt' });
+  }
+});
+
 module.exports = router;
