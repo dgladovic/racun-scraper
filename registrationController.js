@@ -32,8 +32,11 @@ router.use(cors({
 // Route to register a new user
 router.post('/', async (req, res) => {
   try {
-    const { email, password, first_name, last_name, date_of_birth } = req.body;
 
+    let { email, password, first_name, last_name, date_of_birth } = req.body;
+    if(date_of_birth === ''){
+      date_of_birth = new Date();
+    }
     const emailConv = email.toLowerCase();
     // Check if the username is already taken
     const client = await pool.connect();
