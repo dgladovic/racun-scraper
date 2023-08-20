@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
-const port = 4800;
 const { Pool } = require('pg');
+const port = process.env.PORT || 4800;
 
 app.use((req, res, next) => {
     req.pool = pool;
@@ -36,8 +36,7 @@ const pool = new Pool({
     console.log("Connected psql-users");
   });
 
+  const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
+  server.keepAliveTimeout = 120 * 1000;
+  server.headersTimeout = 120 * 1000;
