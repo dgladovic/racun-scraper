@@ -1,27 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { Pool } = require('pg');
-
-// Create a PostgreSQL connection pool
-const pool = new Pool({
-    user: 'scrapingbaza_user',
-    host: 'dpg-cjad83ee546c738chkv0-a.frankfurt-postgres.render.com',
-    database: 'scrapingbaza',
-    password: '7sB3jE0dmRriRZhXJjKTC9LhvbNRYXF0',
-    port: 5432,
-    ssl: {
-      rejectUnauthorized: false // This option is used to bypass SSL certificate validation (use with caution)
-    }
-  });
-  pool.connect(function (err) {
-    if (err) throw err;
-    console.log("Connected psql-users");
-  });
 
 // Route to list all users
 router.get('/', async (req, res) => {
   try {
-    const client = await pool.connect();
+    const client = await req.pool.connect();
     const query = 'SELECT * FROM users';
     const result = await client.query(query);
     const users = result.rows;
@@ -35,7 +18,7 @@ router.get('/', async (req, res) => {
 
 router.delete('/all', async (req, res) => {
     try {
-      const client = await pool.connect();
+      const client = await req.pool.connect();
       await client.query('DELETE FROM users');
       client.release();
       res.status(200).json({ message: 'All users deleted successfully' });
@@ -47,7 +30,7 @@ router.delete('/all', async (req, res) => {
 
   router.delete('/:id', async (req, res) => {
     try {
-      const client = await pool.connect();
+      const client = await req.pool.connect();
       const result = await client.query('DELETE FROM users WHERE user_id = $1',[req.params.id]);
       client.release();
       res.status(200).json({ message: `User with user_id ${req.params.id} deleted successfuly` });

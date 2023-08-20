@@ -8,12 +8,12 @@ const parseData = (res) => {
     
         const receiptRawData = htmlReceipt.split('\n========================================\n');
         const receiptItems = receiptRawData[1].split('\n');
-        const receiptTax = parseFloat(receiptRawData[2].split('\n----------------------------------------\n')[1].split(':')[1].trim().replace(',','.'));
+        const receiptTax = parseFloat(receiptRawData[2].split('\n----------------------------------------\n')[1].split(':')[1].trim().replace(',','.')).toFixed(2);
         let timeDate = receiptRawData[3].split('\n')[0].split('време:')[1].trim();
 
         const receiptRawAmount = receiptItems.slice(receiptItems.length-2,receiptItems.length-1)[0].split(':');
         const parsedAmount = receiptRawAmount[1].replace('.',' ').replace(',','.').trim().split();
-        let receiptAmount = parseFloat(parsedAmount[0].replace(/\s+/g, "!").replace('!',''));
+        let receiptAmount = parseFloat(parsedAmount[0].replace(/\s+/g, "!").replace('!','')).toFixed(2);
     
         const parsingSellerInfo = receiptRawData[0].split('\n');
         const sellerData = {
@@ -63,7 +63,7 @@ const parseData = (res) => {
                     let con2 = cont.split('!');
                     item.price = parseFloat(con2[1].replace('.','').replace(',','.'));
                     item.amount = parseFloat(con2[2].replace('.','').replace(',','.'));
-                    item.total = parseFloat(con2[3].replace('.','').replace(',','.'));
+                    item.total = parseFloat(con2[3].replace('.','').replace(',','.')).toFixed(2);
                     items.push(item);
                     j = j + 1;
                     continue;
@@ -74,7 +74,7 @@ const parseData = (res) => {
                     let con2 = cont.split('!');
                     item.price = parseFloat(con2[1].replace('.','').replace(',','.'));
                     item.amount = parseFloat(con2[2].replace('.','').replace(',','.'));
-                    item.total = parseFloat(con2[3].replace('.','').replace(',','.'));
+                    item.total = parseFloat(con2[3].replace('.','').replace(',','.')).toFixed(2);
                     items.push(item); 
                 }
             }
