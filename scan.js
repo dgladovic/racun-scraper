@@ -32,11 +32,18 @@ router.post('/save', async (req, res) => {
 
     const client = await req.pool.connect();
     console.log('saving-receipt');
-    const checkQuery = 'SELECT COUNT(*) FROM receipts WHERE receipt_number = $1';
+    console.log(req.body);
+    const checkQuery = 'SELECT receipt_number FROM receipts WHERE receipt_number = $1';
     const { rows } = await client.query(checkQuery, [receiptNumber]);
-    const existingCount = parseInt(rows[0].count, 10);
+    console.log(rows);
+    const existingCount = rows[0]['receipt_number'];
+    console.log(isNaN(existingCount));
 
-    if (existingCount > 0) {
+    //     const query = 'SELECT * FROM users WHERE email = $1';
+    // const result = await client.query(query, [emailConv]);
+    // const user = result.rows[0];
+
+    if (!isNaN(existingCount)) {
       client.release();
       return res.status(400).json({ error: 'Receipt with the same receipt_number already exists' });
     }
@@ -60,7 +67,7 @@ router.post('/save', async (req, res) => {
     ]);
 
     client.release();
-
+    console.log('receipt-saved');
     res.json({ message: 'Receipt saved successfully' });
   } catch (err) {
     console.error(err);
