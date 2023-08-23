@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const parser = require('./parser');
-const { Pool } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
@@ -33,37 +33,29 @@ router.post('/save', async (req, res) => {
 
     console.log(req.body);
 
-    const client = await req.pool.connect();
-    console.log('saving-receipt');
-    const checkQuery = 'SELECT COUNT(*) FROM receipts WHERE receipt_number = $1';
-    const { rows } = await client.query(checkQuery, [receiptNumber]);
-    const existingCount = parseInt(rows[0].count, 10);
+    const db = req.admin.firestore();
+    const receiptsCollection = db.collection('receipts');
 
-    if (existingCount > 0) {
-      client.release();
+    const snapshot = await receiptsCollection.where('receipt_number', '==', receiptNumber).get();
+    if (!snapshot.empty) {
       return res.status(400).json({ error: 'Receipt with the same receipt_number already exists' });
     }
 
-    const insertQuery = `
-  INSERT INTO receipts (receipt_number, tax_number, user_id, name, tax_name, address, location, items, receipt_amount, receipt_tax, time_date)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-`;
+    const newReceipt = {
+      receipt_number: receiptNumber,
+      tax_number: taxNumber,
+      user_id: userId,
+      name: name,
+      tax_name: taxName,
+      address: address,
+      location: location,
+      items: items,
+      receipt_amount: receiptAmount,
+      receipt_tax: receiptTax,
+      time_date: timeDate
+    };
 
-    await client.query(insertQuery, [
-      receiptNumber,
-      taxNumber,
-      userId,
-      name,
-      taxName,
-      address,
-      location,
-      JSON.stringify(items),
-      receiptAmount,
-      receiptTax,
-      timeDate
-    ]);
-
-    client.release();
+    await receiptsCollection.add(newReceipt);
 
     res.json({ message: 'Receipt saved successfully' });
   } catch (err) {
