@@ -35,10 +35,10 @@ router.get('/totalpurchases/:userId', async (req, res) => {
 
     let totalAmount = 0;
     querySnapshot.forEach((doc) => {
-      totalAmount += parseFloat(doc.data().receipt_amount);
+      totalAmount += doc.data().receipt_amount;
     });
 
-    const response = convertToCamelCase({ total_amount: totalAmount.toFixed(2) });
+    const response = convertToCamelCase({ total_amount: Math.round(totalAmount*100)/100 });
     res.status(200).json(response);
   } catch (err) {
     console.error(err);
