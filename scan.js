@@ -19,6 +19,7 @@ router.post('/save', async (req, res) => {
   try {
     const {
       receiptNumber,
+      taxNumber,
       userId,
       name,
       taxName,
@@ -29,6 +30,8 @@ router.post('/save', async (req, res) => {
       receiptTax,
       timeDate
     } = req.body;
+
+    console.log(req.body);
 
     const client = await req.pool.connect();
     console.log('saving-receipt');
@@ -42,12 +45,13 @@ router.post('/save', async (req, res) => {
     }
 
     const insertQuery = `
-  INSERT INTO receipts (receipt_number, user_id, name, tax_name, address, location, items, receipt_amount, receipt_tax, time_date)
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+  INSERT INTO receipts (receipt_number, tax_number, user_id, name, tax_name, address, location, items, receipt_amount, receipt_tax, time_date)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 `;
 
     await client.query(insertQuery, [
       receiptNumber,
+      taxNumber,
       userId,
       name,
       taxName,
