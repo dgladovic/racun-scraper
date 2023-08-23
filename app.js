@@ -1,10 +1,17 @@
 const express = require('express');
 const app = express();
-const { Pool } = require('pg');
 const port = process.env.PORT || 4800;
 
+const admin = require('firebase-admin');
+const serviceAccount = require('./firebase_key.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 app.use((req, res, next) => {
-    req.pool = pool;
+    req.admin = admin;
     next();
 });
 
@@ -20,23 +27,7 @@ app.use('/login',require('./authController'));
 const usersRouter = require('./users');
 app.use('/users',usersRouter);
 
-// Create a PostgreSQL connection pool
-const pool = new Pool({
-    user: 'scrapingbaza_user',
-    host: 'dpg-cjad83ee546c738chkv0-a.frankfurt-postgres.render.com',
-    database: 'scrapingbaza',
-    password: '7sB3jE0dmRriRZhXJjKTC9LhvbNRYXF0',
-    port: 5432,
-    ssl: {
-      rejectUnauthorized: false // This option is used to bypass SSL certificate validation (use with caution)
-    }
-  });
-  pool.connect(function (err) {
-    if (err) throw err;
-    console.log("Connected psql-users");
-  });
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
-  const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
-  server.keepAliveTimeout = 120 * 1000;
-  server.headersTimeout = 120 * 1000;
+server.keepAliveTimeout = 120 * 1000;
+server.headersTimeout = 120 * 1000;
