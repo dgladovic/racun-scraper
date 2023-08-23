@@ -5,8 +5,6 @@ const parser = require('./parser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const { Pool } = require('pg');
-
 function convertToCamelCase(obj) {
   const result = {};
   for (const key in obj) {
@@ -32,19 +30,16 @@ router.get('/totalpurchases/:userId', async (req, res) => {
     console.log('get-total-amount');
     const userId = req.params.userId;
 
-    const client = await req.pool.connect();
-    const query = `
-      SELECT SUM(receipt_amount) AS totalAmount
-      FROM receipts
-      WHERE user_id = $1
-    `;
+    const receiptsRef = req.admin.firestore().collection('receipts'); // Using req.admin here
+    const querySnapshot = await receiptsRef.where('user_id', '==', userId).get();
 
-    const result = await client.query(query, [userId]);
-    const totalAmount = result.rows[0].totalamount || 0;
+    let totalAmount = 0;
+    querySnapshot.forEach((doc) => {
+      totalAmount += doc.data().receipt_amount;
+    });
 
-    client.release();
     const response = convertToCamelCase({ total_amount: totalAmount });
-    res.status(200).json({ totalAmount }); // Include 200 status code
+    res.status(200).json(response);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error retrieving total amount by user' });
@@ -56,21 +51,19 @@ router.get('/:userId', async (req, res) => {
     console.log('get-all-receipts');
     const userId = req.params.userId;
 
-    const client = await req.pool.connect();
-    const query = `
-      SELECT * FROM public.receipts
-      WHERE user_id = $1
-    `;
+    const receiptsRef = req.admin.firestore().collection('receipts'); // Using req.admin here
+    const querySnapshot = await receiptsRef.where('user_id', '==', userId).get();
 
-    const result = await client.query(query, [userId]);
-    const receipts = result.rows;
-
-    client.release();
-
-    if (receipts.length === 0) {
+    if (querySnapshot.empty) {
       return res.status(404).json({ message: 'No purchases found' });
     }
-    const convertedReceipts = receipts.map(convertToCamelCase);
+
+    const convertedReceipts = [];
+    querySnapshot.forEach((doc) => {
+      const receiptData = doc.data();
+      convertedReceipts.push(convertToCamelCase(receiptData));
+    });
+
     res.status(200).json(convertedReceipts);
   } catch (err) {
     console.error(err);
@@ -80,10 +73,12 @@ router.get('/:userId', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const client = await req.pool.connect();
-    const result = await client.query('DELETE FROM public.receipts WHERE receipt_number = $1',[req.params.id]);
-    client.release();
-    res.status(200).json({ message: `Receipt with id ${req.params.id} deleted successfuly` });
+    const receiptId = req.params.id;
+
+    const receiptsRef = req.admin.firestore().collection('receipts').doc(receiptId); // Using req.admin here
+    await receiptRef.delete();
+
+    res.status(200).json({ message: `Receipt with id ${receiptId} deleted successfully` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error deleting receipt' });
