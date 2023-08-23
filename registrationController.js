@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
         email: emailConv,
         first_name: first_name,
         last_name: last_name,
-        password: password,
+        password: hash,
         date_of_birth: date_of_birth
       };
       const newUserRef = await usersRef.add(newUser);
