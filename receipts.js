@@ -7,22 +7,6 @@ const bodyParser = require('body-parser');
 
 const { Pool } = require('pg');
 
-const pool = new Pool({
-  user: 'scrapingbaza_user',
-  host: 'dpg-cjad83ee546c738chkv0-a.frankfurt-postgres.render.com',
-  database: 'scrapingbaza',
-  password: '7sB3jE0dmRriRZhXJjKTC9LhvbNRYXF0',
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false // This option is used to bypass SSL certificate validation (use with caution)
-  }
-});
-
-pool.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected psql");
-});
-
 function convertToCamelCase(obj) {
   const result = {};
   for (const key in obj) {
@@ -45,9 +29,10 @@ router.use(bodyParser.json());
 
 router.get('/totalpurchases/:userId', async (req, res) => {
   try {
+    console.log('get-total-amount');
     const userId = req.params.userId;
 
-    const client = await pool.connect();
+    const client = await req.pool.connect();
     const query = `
       SELECT SUM(receipt_amount) AS totalAmount
       FROM receipts
@@ -68,9 +53,10 @@ router.get('/totalpurchases/:userId', async (req, res) => {
 
 router.get('/:userId', async (req, res) => {
   try {
+    console.log('get-all-receipts');
     const userId = req.params.userId;
 
-    const client = await pool.connect();
+    const client = await req.pool.connect();
     const query = `
       SELECT * FROM public.receipts
       WHERE user_id = $1
@@ -94,7 +80,7 @@ router.get('/:userId', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const client = await pool.connect();
+    const client = await req.pool.connect();
     const result = await client.query('DELETE FROM public.receipts WHERE receipt_number = $1',[req.params.id]);
     client.release();
     res.status(200).json({ message: `Receipt with id ${req.params.id} deleted successfuly` });

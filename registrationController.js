@@ -9,22 +9,6 @@ const cors = require('cors');
 // Replace this with your actual secret key
 const secretKey = 'your-secret-key';
 
-// Create a PostgreSQL connection pool
-const pool = new Pool({
-    user: 'scrapingbaza_user',
-    host: 'dpg-cjad83ee546c738chkv0-a.frankfurt-postgres.render.com',
-    database: 'scrapingbaza',
-    password: '7sB3jE0dmRriRZhXJjKTC9LhvbNRYXF0',
-    port: 5432,
-    ssl: {
-      rejectUnauthorized: false // This option is used to bypass SSL certificate validation (use with caution)
-    }
-  });
-  pool.connect(function (err) {
-    if (err) throw err;
-    console.log("Connected psql-registration");
-  });
-
 router.use(bodyParser.json());
 router.use(cors({
     origin: '*'
@@ -32,11 +16,14 @@ router.use(cors({
 // Route to register a new user
 router.post('/', async (req, res) => {
   try {
-    const { email, password, first_name, last_name, date_of_birth } = req.body;
-
+    console.log('registrate-app');
+    let { email, password, first_name, last_name, date_of_birth } = req.body;
+    if(date_of_birth === ''){
+      date_of_birth = new Date();
+    }
     const emailConv = email.toLowerCase();
     // Check if the username is already taken
-    const client = await pool.connect();
+    const client = await req.pool.connect();
     const checkQuery = 'SELECT COUNT(*) FROM users WHERE email = $1';
     const { rows } = await client.query(checkQuery, [emailConv]);
     const existingCount = parseInt(rows[0].count, 10);
