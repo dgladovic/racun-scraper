@@ -43,12 +43,12 @@ const parseData = (res) => {
 
             if(i % 2 === 0){    // obradjuje cenu artikla i naziv tako sto poredi i sledeci red
                 item.name = e.trim();
-                if(!parsingData[i+1]){
+                if(!parsingData[i+1]){  // ovo je provera za to da li je kraj niza na racunu
                     checkIfString = 1000;
                 }else{
                     checkIfString = parsingData[i+1].trim();
                 }
-                if(checkIfString.length > 0){
+                if(checkIfString.length > 0){   // trebalo bi da se ovo gura u stack, pa odatle da se vadi
                     secondRow = checkIfString;
                     checkIfString = checkIfString.replace(/\s+/g, "!");
                     checkIfString = checkIfString.split('!');
@@ -60,7 +60,7 @@ const parseData = (res) => {
                     checkIfString = 1000;
                 }
 
-                if(isNaN(checkIfString)){    // ukoliko je broj vraca false
+                if(isNaN(checkIfString)){    // ukoliko je broj vraca false, a ovo je za multi-line
                     let tab = parsingData[i+2].trim();
                     let cont = parsingData[i+2].replace(/\s+/g, "!");
                     let con2 = cont.split('!');
@@ -71,7 +71,7 @@ const parseData = (res) => {
                     j = j + 1;
                     continue;
                 }   
-                if(parsingData.length - 1 != j){
+                if(parsingData.length - 1 != j){    // ovo je za single line iteme na racnuu
                     let tab = parsingData[i+1].trim();
                     let cont = parsingData[i+1].replace(/\s+/g, "!");
                     let con2 = cont.split('!');
