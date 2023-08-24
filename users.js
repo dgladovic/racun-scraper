@@ -5,12 +5,12 @@ const router = express.Router();
 // Route to list all users
 router.get('/', async (req, res) => {
   try {
-    const usersCollection = admin.firestore().collection('users');
+    const usersCollection = req.admin.firestore().collection('users');
     const querySnapshot = await usersCollection.get();
     
     const users = [];
     querySnapshot.forEach((doc) => {
-      users.push(doc.data());
+      users.push({...doc.data(), id:doc.id});
     });
 
     res.status(200).json(users);
@@ -22,10 +22,9 @@ router.get('/', async (req, res) => {
 
 router.delete('/all', async (req, res) => {
   try {
-    const usersCollection = admin.firestore().collection('users');
-    
+    const usersCollection = req.admin.firestore().collection('users');
     const querySnapshot = await usersCollection.get();
-    const batch = db.batch();
+    const batch = req.admin.firestore().batch();
     querySnapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
@@ -41,7 +40,7 @@ router.delete('/all', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const usersCollection = admin.firestore().collection('users');
+    const usersCollection = req.admin.firestore().collection('users');
     
     const userId = req.params.id;
     await usersCollection.doc(userId).delete();

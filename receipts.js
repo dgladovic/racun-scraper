@@ -61,7 +61,7 @@ router.get('/:userId', async (req, res) => {
     const convertedReceipts = [];
     querySnapshot.forEach((doc) => {
       const receiptData = doc.data();
-      convertedReceipts.push(convertToCamelCase(receiptData));
+      convertedReceipts.push({...convertToCamelCase(receiptData), receiptId: doc.id});
     });
 
     res.status(200).json(convertedReceipts);
@@ -75,7 +75,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const receiptId = req.params.id;
 
-    const receiptsRef = req.admin.firestore().collection('receipts').doc(receiptId); // Using req.admin here
+    const receiptRef = req.admin.firestore().collection('receipts').doc(receiptId); // Using req.admin here
     await receiptRef.delete();
 
     res.status(200).json({ message: `Receipt with id ${receiptId} deleted successfully` });
