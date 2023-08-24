@@ -14,12 +14,13 @@ router.use(cors({
 // Route to authenticate a user
 router.post('/', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Username and Password are required!' });
 
+    const emailConv = email.toLowerCase();
     const usersCollection = req.admin.firestore().collection('users');
     
-    const querySnapshot = await usersCollection.where('email', '==', email).get();
+    const querySnapshot = await usersCollection.where('email', '==', emailConv).get();
     if (querySnapshot.empty) {
       return res.status(401).json({ message: 'Authentication failed - unauthorized.' });
     }
