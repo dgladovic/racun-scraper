@@ -4,7 +4,8 @@
   "description": "server for scarping data",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "env-cmd -f .env.dev node app.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +14,7 @@
     "bcrypt": "^5.1.0",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
+    "env-cmd": "^10.1.0",
     "express": "^4.18.2",
     "firebase": "^10.3.0",
     "firebase-admin": "^11.10.1",
