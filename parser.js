@@ -10,8 +10,11 @@ const parseData = (res) => {
         const receiptItems = receiptRawData[1].split('\n');
         const receiptTax = parseFloat(receiptRawData[2].split('\n----------------------------------------\n')[1].split(':')[1].trim().replace(',','.'));
         let timeDate = receiptRawData[3].split('\n')[0].split('време:')[1].trim();
-        const realReceiptNumber = receiptRawData[3].split('\n')[1].split('рачуна:')[1].trim();
-
+        let realReceiptNumber = receiptRawData[3].split('\n')[1].split('рачуна:')[1].trim();
+        let receiptNumberLineTwo = receiptRawData[3].split('\n')[2];
+        if (!receiptNumberLineTwo.startsWith('Бројач')){
+            realReceiptNumber = realReceiptNumber + receiptNumberLineTwo;
+        }
 
         const receiptRawAmount = receiptItems.slice(receiptItems.length-2,receiptItems.length-1)[0].split(':');
         const parsedAmount = receiptRawAmount[1].replace('.',' ').replace(',','.').trim().split();
