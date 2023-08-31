@@ -92,7 +92,7 @@ router.get('/', async (req, res) => {
 
     if (userId) {
       const userTransactionsSnapshot = await transactionsCollection.where('user_id', '==', userId).get();
-      const userTransactions = userTransactionsSnapshot.docs.map(doc => doc.data());
+      const userTransactions = userTransactionsSnapshot.docs.map(doc => doc.data()).sort((a,b)=> b.time_added - a.time_added);
       res.status(200).json(userTransactions);
     } else {
       const allTransactionsSnapshot = await transactionsCollection.get();
