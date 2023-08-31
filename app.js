@@ -18,6 +18,9 @@ app.use((req, res, next) => {
 const receiptsRouter = require('./receipts');
 app.use('/receipts', receiptsRouter);
 
+const transactionsRouter = require('./transactions');
+app.use('/transactions', transactionsRouter);
+
 const scanRouter = require('./scan');
 app.use('/scan', scanRouter);
 
