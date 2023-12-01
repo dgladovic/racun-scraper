@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const admin = require('firebase-admin');
 
 router.use(bodyParser.json());
 router.use(cors({
@@ -28,15 +28,25 @@ router.post('/', async (req, res) => {
     const user = querySnapshot.docs[0].data();
     console.log(querySnapshot.docs[0].id);
 
-    bcrypt.compare(password, user.password, (err, result) => {
-      if (err || !result) {
-        return res.status(401).json({ message: 'Authentication failed' });
-      }
+    const uid = querySnapshot.docs[0].id;
+    const additionalClaims = {
+      normalUser: true
+    }
 
-      // Create and send a JWT token
-      // const token = jwt.sign({ userId: user.user_id }, secretKey, { expiresIn: '1h' });
-      res.status(201).json({ success: `Login successful!`, id: querySnapshot.docs[0].id });
-    });
+    admin.auth().createCustomToken(uid,additionalClaims)
+      .then((token)=>{
+        console.log(token);
+        bcrypt.compare(password, user.password, (err, result) => {
+          if (err || !result) {
+            return res.status(401).json({ message: 'Authentication failed' });
+          }
+    
+          // Create and send a JWT token
+          // const token = jwt.sign({ userId: user.user_id }, secretKey, { expiresIn: '1h' });
+          res.status(201).json({ success: `Login successful!`, id: querySnapshot.docs[0].id, token: token });
+        });
+      });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Authentication failed' });
