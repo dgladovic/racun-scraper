@@ -24,7 +24,7 @@ router.use(cors({
 router.use(bodyParser.json());
 
 // POST a single transaction done by user
-router.post('/save', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     let { amount, category, subcategory, label, date, user_id } = req.body;
 
@@ -86,19 +86,30 @@ router.get('/:transactionId', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const userId = req.query.userId;
+    const category = req.query.category;
+    const subcategory = req.query.subcategory;
 
     const db = req.admin.firestore();
     const transactionsCollection = db.collection('transactions');
 
+    let query = transactionsCollection;
+
     if (userId) {
-      const userTransactionsSnapshot = await transactionsCollection.where('user_id', '==', userId).get();
-      const userTransactions = userTransactionsSnapshot.docs.map(doc => doc.data()).sort((a,b)=> b.time_added - a.time_added);
-      res.status(200).json(userTransactions);
-    } else {
-      const allTransactionsSnapshot = await transactionsCollection.get();
-      const allTransactions = allTransactionsSnapshot.docs.map(doc => doc.data());
-      res.status(200).json(allTransactions);
+      query = query.where('user_id', '==', userId);
     }
+
+    if (category) {
+      query = query.where('category', '==', category);
+    }
+
+    if (subcategory) {
+      query = query.where('subcategory', '==', subcategory);
+    }
+
+    const snapshot = await query.get();
+    const transactions = snapshot.docs.map(doc => doc.data()).sort((a, b) => b.time_added - a.time_added);
+
+    res.status(200).json(transactions);
   } catch (error) {
     console.error('Error getting transactions:', error);
     res.status(500).json({ error: 'An error occurred while getting the transactions.' });
